@@ -1,10 +1,8 @@
 const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => (
   <div>
     {model.cj.collection.commands.map(command =>
-      <div className="card p-5">
-        <div className="title-container">
-          <h1>{command.prompt}</h1>
-        </div>
+      <div className="card p-2">
+        <h4>{command.prompt}</h4>
         <form className="" action={command.href} method="POST" onSubmit={(e) => {
           var form, nodes, data;
           data = [];
@@ -26,17 +24,15 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => (
           modelUpdate({
             cj: model.cj,
             form: {template: {data: data}}
-          }).then(() => {
-            triggerQuery(command.name)
-          });
+          })
+          setTimeout(() => triggerQuery(command.name), 1000)
         }}>
-          {/* The text below is dynamic and specified by the model. */}
           {command.data.map(datum => {
             switch (datum.type) {
               case 'select':
                 return <div hidden={datum.display === false} className="mb-3">
-                  <label className="form-label" htmlFor={datum.name}>{datum.prompt}: </label>
-                  <select id={datum.name} name={datum.name} value={datum.value} className="form-select">
+                  <label className="form-label-sm me-2" htmlFor={datum.name}>{datum.prompt}: </label>
+                  <select id={datum.name} name={datum.name} value={datum.value} className="form-select-sm">
                     <option></option>
                     {
                       datum.suggest.map(sug => {
@@ -47,24 +43,24 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => (
                 </div>
               case 'bool':
                 return <div hidden={datum.display === false} className="mb-3">
-                  <label className="form-label" htmlFor={datum.name}>{datum.prompt}: </label>
+                  <label className="form-label-sm me-2" htmlFor={datum.name}>{datum.prompt}: </label>
                   <input type="checkbox" id={datum.name} name={datum.name} value={datum.value === "true"}
-                         className="form-check-input"/>
+                         className="form-check-input-sm"/>
                 </div>
               case 'date':
                 return <div hidden={datum.display === false} className="mb-3">
-                  <label className="form-label" htmlFor={datum.name}>{datum.prompt}: </label>
-                  <input type="date" id={datum.name} name={datum.name} value={datum.value} className="form-control"/>
+                  <label className="form-label-sm me-2" htmlFor={datum.name}>{datum.prompt}: </label>
+                  <input type="date" id={datum.name} name={datum.name} value={datum.value} className="form-control-sm"/>
                 </div>
               default:
                 return <div hidden={datum.display === false} className="mb-3">
-                  <label className="form-label" htmlFor={datum.name}>{datum.prompt}: </label>
-                  <input type="text" id={datum.name} name={datum.name} value={datum.value} className="form-control"/>
+                  <label className="form-label-sm me-2" htmlFor={datum.name}>{datum.prompt}: </label>
+                  <input type="text" id={datum.name} name={datum.name} value={datum.value} className="form-control-sm"/>
                 </div>
             }
 
           })}
-          <input type="submit" value={command.prompt} className="btn btn-primary"/>
+          <input type="submit" value={command.prompt} className="btn btn-primary btn-sm"/>
         </form>
       </div>
     )}
