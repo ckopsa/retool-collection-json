@@ -1,0 +1,19 @@
+{
+  "name": "retool-collection-json",
+  "version": "1.0.0",
+  "description": "retool import to allow for collection+json support",
+  "main": "",
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coljamkop/retool-collection-json.git"
+  },
+  "author": "Colton Kopsa",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/coljamkop/retool-collection-json/issues"
+  },
+  "homepage": "https://github.com/coljamkop/retool-collection-json#readme"
+}
