@@ -4,7 +4,7 @@
   "description": "retool import to allow for collection+json support",
   "main": "",
   "scripts": {
-    "test": ""
+    "build": "babel src -d lib"
   },
   "repository": {
     "type": "git",
@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/coljamkop/retool-collection-json/issues"
   },
-  "homepage": "https://github.com/coljamkop/retool-collection-json#readme"
+  "homepage": "https://github.com/coljamkop/retool-collection-json#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.19.3",
+    "@babel/core": "^7.20.5",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-react": "^7.18.6"
+  }
 }
