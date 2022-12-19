@@ -44,18 +44,18 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => (
               case 'bool':
                 return <div hidden={datum.display === false} className="mb-3">
                   <label className="form-label-sm me-2" htmlFor={datum.name}>{datum.prompt}: </label>
-                  <input type="checkbox" id={datum.name} name={datum.name} defaultChecked={datum.value === "true"}
+                  <input type="checkbox" id={datum.name} name={datum.name} defaultChecked={datum.value === "true" || false}
                          className="form-check-input-sm"/>
                 </div>
               case 'date':
                 return <div hidden={datum.display === false} className="mb-3">
                   <label className="form-label-sm me-2" htmlFor={datum.name}>{datum.prompt}: </label>
-                  <input type="date" id={datum.name} name={datum.name} value={datum.value} className="form-control-sm"/>
+                  <input type="date" id={datum.name} name={datum.name} value={datum.value || ''} className="form-control-sm"/>
                 </div>
               default:
                 return <div hidden={datum.display === false} className="mb-3">
                   <label className="form-label-sm me-2" htmlFor={datum.name}>{datum.prompt}: </label>
-                  <input type="text" id={datum.name} name={datum.name} value={datum.value} className="form-control-sm"/>
+                  <input type="text" id={datum.name} name={datum.name} value={datum.value || ''} className="form-control-sm"/>
                 </div>
             }
 
