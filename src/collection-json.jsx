@@ -44,7 +44,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => (
               case 'bool':
                 return <div hidden={datum.display === false} className="mb-3">
                   <label className="form-label-sm me-2" htmlFor={datum.name}>{datum.prompt}: </label>
-                  <input type="checkbox" id={datum.name} name={datum.name} value={datum.value === "true"}
+                  <input type="checkbox" id={datum.name} name={datum.name} checked={datum.value === "true"}
                          className="form-check-input-sm"/>
                 </div>
               case 'date':
