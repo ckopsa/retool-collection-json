@@ -1,5 +1,8 @@
 const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
   var fullMode = true;
+  var queries = model.cj.collection.queries;
+  var commands = model.cj.collection.commands;
+  var items = model.cj.collection.items;
   var [loading, setLoading] = React.useState(false);
   var [showApps, setShowApps] = React.useState(false);
   var triggerQueryWithLoading = React.useCallback((...args) => {
@@ -108,7 +111,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
   }
 
   var queryToComponent = (query, httpFunc) => {
-    return (<div className="card p-2">
+    return (<div className="card p-3">
         <h4>{query.prompt}</h4>
         <form className="" action={query.href} method="POST" name={query.name} onSubmit={e => httpFunc(e, query.href)}>
           {query.data.map(datum => {
@@ -213,29 +216,33 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
         </div>
       </div>}
     </div>
-    <div className="row w-100">
-      <div className="col">
-        {model.cj.collection.items.map(it => <div className="card p-2 mb-3">
-          <ul className="list-group list-group-flush">
-            {it.data.map((itData, i) => <li
-              name={itData.name}
-              className="list-group-item d-flex justify-content-between">
-              {itData.prompt}: <span>{itData.value}</span>
-            </li>)}
-          </ul>
-          <div className="card-body">
-            {fullMode && it.links && it.links.map((itLink, i) => <a
-              href={itLink.href} className="card-link btn btn-primary"
-              onClick={(e) => httpGet(e, itLink.href)}>
-              {itLink.prompt}
-            </a>)}
-          </div>
-        </div>)}
-      </div>
-      <div className="col">
-        {model.cj.collection.queries.map(query => queryToComponent(query, httpQuery))}
-        {model.cj.collection.commands.map(command => queryToComponent(command, httpPost))}
-      </div>
+    <div className="row ps-4 w-100 d-flex justify-content-center">
+      {items.length !== 0 &&
+        <div className="col-6">
+          {items.map(it => <div className="card p-3 mb-3">
+            <ul className="list-group list-group-flush">
+              {it.data.map((itData, i) => <li
+                name={itData.name}
+                className="list-group-item d-flex justify-content-between">
+                {itData.prompt}: <span>{itData.value}</span>
+              </li>)}
+            </ul>
+            <div className="card-body">
+              {fullMode && it.links && it.links.map((itLink, i) => <a
+                href={itLink.href} className="card-link btn btn-primary"
+                onClick={(e) => httpGet(e, itLink.href)}>
+                {itLink.prompt}
+              </a>)}
+            </div>
+          </div>)}
+        </div>
+      }
+      {(queries.length !== 0 || commands.length !== 0) &&
+        <div className="col-6">
+          {queries.map(query => queryToComponent(query, httpQuery))}
+          {commands.map(command => queryToComponent(command, httpPost))}
+        </div>
+      }
     </div>
   </div>)
 }
