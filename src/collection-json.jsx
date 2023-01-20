@@ -1,16 +1,16 @@
 const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
-  var fullMode = false;
-  var queries = model.cj.collection.queries;
-  var commands = model.cj.collection.commands;
-  var items = model.cj.collection.items;
-  var [loading, setLoading] = React.useState(false);
-  var [showApps, setShowApps] = React.useState(false);
-  var triggerQueryWithLoading = React.useCallback((...args) => {
+  let fullMode = false;
+  let queries = model.cj.collection.queries;
+  let commands = model.cj.collection.commands;
+  let items = model.cj.collection.items;
+  let [loading, setLoading] = React.useState(false);
+  let [showApps, setShowApps] = React.useState(false);
+  let triggerQueryWithLoading = React.useCallback((...args) => {
     setLoading(true);
     triggerQuery(...args);
   }, [triggerQuery]);
 
-  var httpGet = (e, href) => {
+  let httpGet = (e, href) => {
     let currentHistory = JSON.parse(sessionStorage.getItem('historyStack')) || [];
     if (currentHistory.length > 0) {
       let lastHistory = currentHistory[currentHistory.length - 1];
@@ -28,8 +28,8 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
     triggerQueryWithLoading("httpGet")
     e.preventDefault();
     return false;
-  }
-  var httpQuery = (e, href) => {
+  };
+  let httpQuery = (e, href) => {
     let q = 0
     let form = e.target
     let query = href + '/?'
@@ -44,10 +44,10 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
     }
     httpGet(e, query)
     return false
-  }
+  };
 
-  var httpPost = (e, href) => {
-    var form, nodes, data;
+  let httpPost = (e, href) => {
+    let form, nodes, data;
     data = [];
     form = e.target;
     nodes = form.elements;
@@ -68,9 +68,9 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
       cj: model.cj, link: href, form: {template: {data: data}}
     })
     setTimeout(() => triggerQueryWithLoading(fullMode ? "httpPost" : form.name), 1000)
-  }
+  };
 
-  var goBack = () => {
+  let goBack = () => {
     let currentHistory = JSON.parse(sessionStorage.getItem('historyStack')) || [];
     let href = currentHistory.pop();
     sessionStorage.setItem('historyStack', JSON.stringify(currentHistory));
@@ -83,14 +83,14 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
       cj: model.cj, form: model.form, link: href
     });
     triggerQueryWithLoading("httpGet")
-  }
+  };
 
-  var historyStackIsEmpty = () => {
+  let historyStackIsEmpty = () => {
     let currentHistory = JSON.parse(sessionStorage.getItem('historyStack')) || [];
     return currentHistory.length === 0;
-  }
+  };
 
-  var goForward = () => {
+  let goForward = () => {
     let currentFuture = JSON.parse(sessionStorage.getItem('futureStack')) || [];
     let href = currentFuture.pop();
     sessionStorage.setItem('futureStack', JSON.stringify(currentFuture));
@@ -103,14 +103,14 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
       cj: model.cj, form: model.form, link: href
     });
     triggerQueryWithLoading("httpGet")
-  }
+  };
 
-  var futureStackIsEmpty = () => {
+  let futureStackIsEmpty = () => {
     let currentFuture = JSON.parse(sessionStorage.getItem('futureStack')) || [];
     return currentFuture.length === 0;
-  }
+  };
 
-  var queryToComponent = (query, httpFunc) => {
+  let queryToComponent = (query, httpFunc) => {
     return (<div className="card p-3">
         <h4>{query.prompt}</h4>
         <form className="" action={query.href} method="POST" name={query.name} onSubmit={e => httpFunc(e, query.href)}>
@@ -156,11 +156,11 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
       </div>
 
     )
-  }
+  };
 
-  return (<div className="bg-light h-100">
+  return (<div className="text-body bg-body" data-bs-theme="dark">
     {fullMode &&
-      <nav className="navbar navbar-expand-lg bg-light rounded">
+      <nav className="navbar navbar-expand-lg rounded">
         <div className="container-fluid">
           <button className="btn" onClick={goBack} hidden={historyStackIsEmpty()}>
             Back
