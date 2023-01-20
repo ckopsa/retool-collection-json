@@ -25,6 +25,22 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
     e.preventDefault();
     return false;
   }
+  var httpQuery = (e, href) => {
+    let q = 0
+    let form = e.target
+    let query = href + '/?'
+    let nodes = form.elements
+    for (let i = 0, x = nodes.length; i < x; i++) {
+      if (nodes[i].name && nodes[i].name !== '' && nodes[i].value && nodes[i].value !== '') {
+        if (q++ !== 0) {
+          query += "&";
+        }
+        query += nodes[i].name + "=" + escape(nodes[i].value);
+      }
+    }
+    httpGet(e, query)
+    return false
+  }
 
   var httpPost = (e, href) => {
     var form, nodes, data;
@@ -90,7 +106,55 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
     return currentFuture.length === 0;
   }
 
-  return (<div className="bg-light">
+  var queryToComponent = (query, httpFunc) => {
+    return (<div className="card p-2">
+        <h4>{query.prompt}</h4>
+        <form className="" action={query.href} method="POST" onSubmit={e => httpFunc(e, query.href)}>
+          {query.data.map(datum => {
+            switch (datum.type) {
+              case 'select':
+                return <div hidden={datum.display === false} className="mb-3">
+                  <label className="form-label me-2" htmlFor={datum.name}>{datum.prompt}: </label>
+                  <select id={datum.name} name={datum.name} defaultValue={datum.value} className="form-select"
+                          required={!!datum.required} disabled={!!datum.readOnly}>
+                    <option></option>
+                    {datum.suggest.map(sug => {
+                      return <option value={sug.value}>{sug.text}</option>
+                    })}
+                  </select>
+                </div>
+              case 'bool':
+                return <div hidden={datum.display === false} className="mb-3">
+                  <label className="form-label me-2" htmlFor={datum.name}>{datum.prompt}: </label>
+                  <input type="checkbox" id={datum.name} name={datum.name} required={!!datum.required}
+                         defaultChecked={datum.value === "true" || false}
+                         className="form-check-input" disabled={!!datum.readOnly}/>
+                </div>
+              case 'date':
+                return <div hidden={datum.display === false} className="mb-3">
+                  <label className="form-label me-2" htmlFor={datum.name}>{datum.prompt}: </label>
+                  <input type="date" id={datum.name} name={datum.name} defaultValue={datum.value || ''}
+                         required={!!datum.required} className="form-control" disabled={!!datum.readOnly}/>
+                </div>
+              default:
+                return <div hidden={datum.display === false} className="mb-3">
+                  <label className="form-label me-2" htmlFor={datum.name}>{datum.prompt}: </label>
+                  <input type="text" id={datum.name} name={datum.name} defaultValue={datum.value || ''}
+                         required={!!datum.required} className="form-control" disabled={!!datum.readOnly}/>
+                </div>
+            }
+
+          })}
+          <div className="justify-content-end d-flex">
+            <input type="submit" value={query.prompt} className="btn btn-primary btn me-3"/>
+          </div>
+        </form>
+      </div>
+
+    )
+  }
+
+  return (<div className="bg-light h-100">
     <nav className="navbar navbar-expand-lg bg-light rounded">
       <div className="container-fluid">
         <button className="btn" onClick={goBack} hidden={historyStackIsEmpty()}>
@@ -139,59 +203,37 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
       <div className="progress-bar progress-bar-striped progress-bar-animated w-100" role="progressbar"
            aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"/>
     </div>
-    {model.cj.collection.commands.map(command => <div className="card p-2">
-      <h4>{command.prompt}</h4>
-      <form className="" action={command.href} method="POST" onSubmit={e => httpPost(e, command.href)}>
-        {command.data.map(datum => {
-          switch (datum.type) {
-            case 'select':
-              return <div hidden={datum.display === false} className="mb-3">
-                <label className="form-label-sm me-2" htmlFor={datum.name}>{datum.prompt}: </label>
-                <select id={datum.name} name={datum.name} defaultValue={datum.value} className="form-select-sm"
-                        required={!!datum.required} disabled={!!datum.readOnly}>
-                  <option></option>
-                  {datum.suggest.map(sug => {
-                    return <option value={sug.value}>{sug.text}</option>
-                  })}
-                </select>
-              </div>
-            case 'bool':
-              return <div hidden={datum.display === false} className="mb-3">
-                <label className="form-label-sm me-2" htmlFor={datum.name}>{datum.prompt}: </label>
-                <input type="checkbox" id={datum.name} name={datum.name} required={!!datum.required}
-                       defaultChecked={datum.value === "true" || false}
-                       className="form-check-input-sm" disabled={!!datum.readOnly}/>
-              </div>
-            case 'date':
-              return <div hidden={datum.display === false} className="mb-3">
-                <label className="form-label-sm me-2" htmlFor={datum.name}>{datum.prompt}: </label>
-                <input type="date" id={datum.name} name={datum.name} defaultValue={datum.value || ''}
-                       required={!!datum.required} className="form-control-sm" disabled={!!datum.readOnly}/>
-              </div>
-            default:
-              return <div hidden={datum.display === false} className="mb-3">
-                <label className="form-label-sm me-2" htmlFor={datum.name}>{datum.prompt}: </label>
-                <input type="text" id={datum.name} name={datum.name} defaultValue={datum.value || ''}
-                       required={!!datum.required} className="form-control-sm" disabled={!!datum.readOnly}/>
-              </div>
-          }
-
-        })}
-        <input type="submit" value={command.prompt} className="btn btn-primary btn-sm"/>
-      </form>
-    </div>)}
-    <div className="bg-light">
-      {model.cj.collection.items.map(it => <div className="card p-2 mb-3">
-        <div className="card-body">
-          {it.data.map((itData, i) => <p name={itData.name} className="card-text">
-            {itData.prompt}: {itData.value}
-          </p>)}
-          {it.links.map((itLink, i) => <a href={itLink.href} className="card-link btn btn-primary"
-                                          onClick={(e) => httpGet(e, itLink.href)}>
-            {itLink.prompt}
-          </a>)}
+    <div>
+      {model.cj.collection.error && <div className="card bg-danger text-white m-2 p-2"><h4
+        className="card-title">{model.cj.collection.error.code} - {model.cj.collection.error.title}</h4>
+        <div className="card-body" style={{whiteSpace: "pre-wrap"}}>
+          {model.cj.collection.error.message}
         </div>
-      </div>)}
+      </div>}
+    </div>
+    <div className="row w-100">
+      <div className="col">
+        {model.cj.collection.items.map(it => <div className="card p-2 mb-3">
+          <ul className="list-group list-group-flush">
+            {it.data.map((itData, i) => <li
+              name={itData.name}
+              className="list-group-item d-flex justify-content-between">
+              {itData.prompt}: <span>{itData.value}</span>
+            </li>)}
+          </ul>
+          <div className="card-body">
+            {it.links && it.links.map((itLink, i) => <a
+              href={itLink.href} className="card-link btn btn-primary"
+              onClick={(e) => httpGet(e, itLink.href)}>
+              {itLink.prompt}
+            </a>)}
+          </div>
+        </div>)}
+      </div>
+      <div className="col">
+        {model.cj.collection.queries.map(query => queryToComponent(query, httpQuery))}
+        {model.cj.collection.commands.map(command => queryToComponent(command, httpPost))}
+      </div>
     </div>
   </div>)
 }
