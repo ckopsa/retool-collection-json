@@ -158,7 +158,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
     )
   };
 
-  return (<div className="text-body bg-body" data-bs-theme="dark">
+  return (<div className="h-100 text-body bg-body" data-bs-theme="dark">
     {fullMode &&
       <nav className="navbar navbar-expand-lg rounded">
         <div className="container-fluid">
