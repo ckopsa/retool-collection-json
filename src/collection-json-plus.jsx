@@ -119,7 +119,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
               case 'select':
                 return <div hidden={datum.display === false} className="mb-3">
                   <label className="form-label me-2" htmlFor={datum.name}>{datum.prompt}: </label>
-                  <select id={datum.name} name={datum.name} defaultValue={datum.value} className="form-select"
+                  <select id={datum.name} name={datum.name} defaultValue={datum.value} className="form-select text-dark"
                           required={!!datum.required} disabled={!!datum.readOnly}>
                     <option></option>
                     {datum.suggest.map(sug => {
@@ -138,13 +138,13 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                 return <div hidden={datum.display === false} className="mb-3">
                   <label className="form-label me-2" htmlFor={datum.name}>{datum.prompt}: </label>
                   <input type="date" id={datum.name} name={datum.name} defaultValue={datum.value || ''}
-                         required={!!datum.required} className="form-control" disabled={!!datum.readOnly}/>
+                         required={!!datum.required} className="form-control text-dark" disabled={!!datum.readOnly}/>
                 </div>
               default:
                 return <div hidden={datum.display === false} className="mb-3">
                   <label className="form-label me-2" htmlFor={datum.name}>{datum.prompt}: </label>
                   <input type="text" id={datum.name} name={datum.name} defaultValue={datum.value || ''}
-                         required={!!datum.required} className="form-control" disabled={!!datum.readOnly}/>
+                         required={!!datum.required} className="form-control text-dark" disabled={!!datum.readOnly}/>
                 </div>
             }
 
