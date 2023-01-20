@@ -1,4 +1,5 @@
 const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
+  var fullMode = true;
   var [loading, setLoading] = React.useState(false);
   var [showApps, setShowApps] = React.useState(false);
   var triggerQueryWithLoading = React.useCallback((...args) => {
@@ -63,7 +64,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
     modelUpdate({
       cj: model.cj, link: href, form: {template: {data: data}}
     })
-    setTimeout(() => triggerQueryWithLoading("httpPost"), 1000)
+    setTimeout(() => triggerQueryWithLoading(fullMode ? "httpPost" : form.name), 1000)
   }
 
   var goBack = () => {
@@ -109,7 +110,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
   var queryToComponent = (query, httpFunc) => {
     return (<div className="card p-2">
         <h4>{query.prompt}</h4>
-        <form className="" action={query.href} method="POST" onSubmit={e => httpFunc(e, query.href)}>
+        <form className="" action={query.href} method="POST" name={query.name} onSubmit={e => httpFunc(e, query.href)}>
           {query.data.map(datum => {
             switch (datum.type) {
               case 'select':
@@ -155,50 +156,51 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
   }
 
   return (<div className="bg-light h-100">
-    <nav className="navbar navbar-expand-lg bg-light rounded">
-      <div className="container-fluid">
-        <button className="btn" onClick={goBack} hidden={historyStackIsEmpty()}>
-          Back
-        </button>
+    {fullMode &&
+      <nav className="navbar navbar-expand-lg bg-light rounded">
+        <div className="container-fluid">
+          <button className="btn" onClick={goBack} hidden={historyStackIsEmpty()}>
+            Back
+          </button>
 
-        <div className="collapse navbar-collapse justify-content-md-center">
-          <ul className="navbar-nav">
-            <li className="nav-item">
-              <a className="nav-link active"
-                 href={model.cj.collection.href}
-                 onClick={(e) => httpGet(e, model.cj.collection.href)}>
-                {model.cj.collection.title}
-              </a>
-            </li>
-            {model.cj.collection.links.filter(link => link.rel.includes('local'))
-              .map(link => <li className="nav-item" key={link.name}>
-                <a className="nav-link" href={link.href}
-                   onClick={(e) => httpGet(e, link.href)}>{link.prompt}</a>
-              </li>)}
-            {/*  Dropdown list of nav items for remaining links*/}
-            <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle" id="navbarDropdown" role="button"
-                 onClick={() => setShowApps(!showApps)}
-              >
-                Apps
-              </a>
-              <ul className={showApps ? "dropdown-menu show" : "dropdown-menu"}>
-                {model.cj.collection.links.filter(link => !link.rel.includes('local')).map(l => {
-                  return <li key={l.name}>
-                    <a className="dropdown-item" href={l.href}
-                       onClick={(e) => httpGet(e, l.href)}>{l.prompt}</a>
-                  </li>
-                })}
-              </ul>
-            </li>
-          </ul>
+          <div className="collapse navbar-collapse justify-content-md-center">
+            <ul className="navbar-nav">
+              <li className="nav-item">
+                <a className="nav-link active"
+                   href={model.cj.collection.href}
+                   onClick={(e) => httpGet(e, model.cj.collection.href)}>
+                  {model.cj.collection.title}
+                </a>
+              </li>
+              {model.cj.collection.links.filter(link => link.rel.includes('local'))
+                .map(link => <li className="nav-item" key={link.name}>
+                  <a className="nav-link" href={link.href}
+                     onClick={(e) => httpGet(e, link.href)}>{link.prompt}</a>
+                </li>)}
+              <li className="nav-item dropdown">
+                <a className="nav-link dropdown-toggle" id="navbarDropdown" role="button"
+                   onClick={() => setShowApps(!showApps)}
+                >
+                  Apps
+                </a>
+                <ul className={showApps ? "dropdown-menu show" : "dropdown-menu"}>
+                  {model.cj.collection.links.filter(link => !link.rel.includes('local')).map(l => {
+                    return <li key={l.name}>
+                      <a className="dropdown-item" href={l.href}
+                         onClick={(e) => httpGet(e, l.href)}>{l.prompt}</a>
+                    </li>
+                  })}
+                </ul>
+              </li>
+            </ul>
+          </div>
+
+          <button className="btn" onClick={goForward} hidden={futureStackIsEmpty()}>
+            Forward
+          </button>
         </div>
-
-        <button className="btn" onClick={goForward} hidden={futureStackIsEmpty()}>
-          Forward
-        </button>
-      </div>
-    </nav>
+      </nav>
+    }
     <div className="progress" hidden={!loading}>
       <div className="progress-bar progress-bar-striped progress-bar-animated w-100" role="progressbar"
            aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"/>
@@ -222,7 +224,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
             </li>)}
           </ul>
           <div className="card-body">
-            {it.links && it.links.map((itLink, i) => <a
+            {fullMode && it.links && it.links.map((itLink, i) => <a
               href={itLink.href} className="card-link btn btn-primary"
               onClick={(e) => httpGet(e, itLink.href)}>
               {itLink.prompt}
