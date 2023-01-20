@@ -140,7 +140,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                   <label className="form-label me-2" htmlFor={datum.name}>{datum.prompt}: </label>
                   <input type="date" id={datum.name} name={datum.name} defaultValue={datum.value || ''}
                          required={!!datum.required}
-                         className={!!datum.readOnly ? "form-select" : "form-select text-dark"}
+                         className={!!datum.readOnly ? "form-control" : "form-control text-dark"}
                          disabled={!!datum.readOnly}/>
                 </div>
               default:
@@ -148,7 +148,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                   <label className="form-label me-2" htmlFor={datum.name}>{datum.prompt}: </label>
                   <input type="text" id={datum.name} name={datum.name} defaultValue={datum.value || ''}
                          required={!!datum.required}
-                         className={!!datum.readOnly ? "form-select" : "form-select text-dark"}
+                         className={!!datum.readOnly ? "form-control" : "form-control text-dark"}
                          disabled={!!datum.readOnly}/>
                 </div>
             }
