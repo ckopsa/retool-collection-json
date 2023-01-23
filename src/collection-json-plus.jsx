@@ -220,7 +220,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
       </div>}
     </div>
     <div className="row ps-4 w-100 d-flex justify-content-center">
-      {items.length !== 0 && <div className="col-6">
+      {fullMode && items.length !== 0 && <div className="col-6">
         {items.map(it => <div className="card p-3 mb-3">
           <ul className="list-group list-group-flush">
             {it.data.map((itData, i) => <li
