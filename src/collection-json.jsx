@@ -32,7 +32,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
     let httpQuery = (e, href) => {
         let q = 0
         let form = e.target
-        let query = href + '/?'
+        let query = href + '?'
         let nodes = form.elements
         for (let i = 0, x = nodes.length; i < x; i++) {
             if (nodes[i].name && nodes[i].name !== '' && nodes[i].value && nodes[i].value !== '') {
