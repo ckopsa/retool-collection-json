@@ -3,11 +3,18 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
     let queries = model.cj.collection.queries;
     let commands = model.cj.collection.commands;
     let items = model.cj.collection.items;
+    let contextItems = model.cj.collection.items.filter(it => it.rel.includes("context"));
+    let normalItems = model.cj.collection.items.filter(it => !it.rel.includes("context"));
     let [loading, setLoading] = React.useState(false);
     let triggerQueryWithLoading = React.useCallback((...args) => {
         setLoading(true);
         triggerQuery(...args);
     }, [triggerQuery]);
+
+    React.useEffect(() => {
+        if (contextItems.length > 0)
+            document.getElementById("contextButton").click()
+    }, [contextItems])
 
     let httpGet = (e, href) => {
         let currentHistory = JSON.parse(sessionStorage.getItem('historyStack')) || [];
@@ -42,7 +49,6 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                 query += nodes[i].name + "=" + escape(nodes[i].value);
             }
         }
-        console.log(query)
         httpGet(e, query)
         return false
     };
@@ -136,10 +142,6 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
             })
         }, [formData])
 
-        React.useEffect(() => {
-            console.log(suggests)
-            console.log(formData)
-        }, [suggests, formData])
         return (<div className="card p-3">
                 <h4>{query.prompt}</h4>
                 <form className="" action={query.href} method="POST" name={query.name}
@@ -201,25 +203,88 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
         )
     };
 
+    const ItemCard = ({item}) => {
+        if (item.rel.includes("items-title")) {
+            return <div className="row py-3">
+                <div className="col">
+                    <h2>{item.data[0].value}</h2>
+                    <hr/>
+                </div>
+            </div>
+        }
+        return <div className="card p-3 mb-3">
+            <ul className="list-group list-group-flush">
+                {item.data.map((itData, i) => <li
+                    name={itData.name}
+                    hidden={itData.display === "false"}
+                    className="list-group-item d-flex justify-content-between">
+                    {itData.prompt}: <span>{itData.value}</span>
+                </li>)}
+            </ul>
+            <div className="card-body">
+                {item.links && (item.links.length < 3 ? item.links.map((itLink, i) => <a
+                    href={itLink.href} className="card-link btn btn-primary"
+                    onClick={(e) => httpGet(e, itLink.href)}>
+                    {itLink.prompt}
+                </a>) : <div className="dropdown">
+                    <button className="btn btn-secondary dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        Actions
+                    </button>
+                    <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        {item.links.map((itLink, i) => <li>
+                            <a className="dropdown-item" href={itLink.href}
+                               onClick={(e) => httpGet(e, itLink.href)}>{itLink.prompt}</a>
+                        </li>)}
+                    </ul>
+                </div>)}
+            </div>
+        </div>;
+    }
+
     return <div className="text-body bg-body">
-        <nav className="navbar navbar-expand-lg rounded">
-            <div className="container-fluid">
+        <div className="row">
+            <div className="col">
                 <button className="btn" onClick={goBack} hidden={historyStackIsEmpty()}>
-                    Back
+                    ⬅️
+                </button>
+                <a className="btn"
+                   href={model.cj.collection.href}
+                   onClick={(e) => httpGet(e, model.cj.collection.href)}>
+                    🔃
+                </a>
+                <button className="btn" onClick={goForward} hidden={futureStackIsEmpty()}>
+                    ➡️
                 </button>
 
-                <div className="collapse navbar-collapse justify-content-md-center">
+            </div>
+            {contextItems.length > 0 && <div className="col-auto">
+                <button className="btn" type="button" data-bs-toggle="offcanvas"
+                        data-bs-target="#offcanvasScrolling" id="contextButton">
+                    ❓
+                </button>
+
+                <div className="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false"
+                     tabIndex="-1"
+                     id="offcanvasScrolling">
+                    <div className="offcanvas-header">
+                        <h5 className="offcanvas-title" id="offcanvasScrollingLabel">Context</h5>
+                        <button type="button" className="btn-close" data-bs-dismiss="offcanvas"></button>
+                    </div>
+                    <div className="offcanvas-body">
+                        {contextItems.map(it => <ItemCard item={it}/>)}
+                    </div>
+                </div>
+            </div>}
+        </div>
+        <nav className="navbar navbar-expand-lg rounded">
+            <div className="container-fluid">
+                <div className="collapse navbar-collapse">
                     <ul className="navbar-nav">
-                        <li className="nav-item">
-                            <a className="nav-link active"
-                               href={model.cj.collection.href}
-                               onClick={(e) => httpGet(e, model.cj.collection.href)}>
-                                {model.cj.collection.title}
-                            </a>
-                        </li>
                         {model.cj.collection.links.filter(link => link.rel.includes('local'))
                             .map(link => <li className="nav-item" key={link.name}>
-                                <a className="nav-link" href={link.href}
+                                <a className={"nav-link " + link.rel} href={link.href}
                                    onClick={(e) => httpGet(e, link.href)}>{link.prompt}</a>
                             </li>)}
                         {fullMode && <li className="nav-item dropdown">
@@ -230,7 +295,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                             <ul className="dropdown-menu">
                                 {model.cj.collection.links.filter(link => !link.rel.includes('local')).map(l => {
                                     return <li key={l.name}>
-                                        <a className="dropdown-item" href={l.href}
+                                        <a className={"dropdown-item " + l.rel} href={l.href}
                                            onClick={(e) => httpGet(e, l.href)}>{l.prompt}</a>
                                     </li>
                                 })}
@@ -239,9 +304,6 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                     </ul>
                 </div>
 
-                <button className="btn" onClick={goForward} hidden={futureStackIsEmpty()}>
-                    Forward
-                </button>
             </div>
         </nav>
         <div className="progress" hidden={!loading}>
@@ -258,35 +320,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
         </div>
         <div className="row ps-4 w-100 d-flex justify-content-center">
             {items.length !== 0 && <div className="col-6">
-                {items.map(it => <div className="card p-3 mb-3">
-                    <ul className="list-group list-group-flush">
-                        {it.data.map((itData, i) => <li
-                            name={itData.name}
-                            hidden={itData.display === "false"}
-                            className="list-group-item d-flex justify-content-between">
-                            {itData.prompt}: <span>{itData.value}</span>
-                        </li>)}
-                    </ul>
-                    <div className="card-body">
-                        {it.links && (it.links.length < 3 ? it.links.map((itLink, i) => <a
-                            href={itLink.href} className="card-link btn btn-primary"
-                            onClick={(e) => httpGet(e, itLink.href)}>
-                            {itLink.prompt}
-                        </a>) : <div className="dropdown">
-                            <button className="btn btn-secondary dropdown-toggle" type="button"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                Actions
-                            </button>
-                            <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                {it.links.map((itLink, i) => <li>
-                                    <a className="dropdown-item" href={itLink.href}
-                                       onClick={(e) => httpGet(e, itLink.href)}>{itLink.prompt}</a>
-                                </li>)}
-                            </ul>
-                        </div>)}
-                    </div>
-                </div>)}
+                {normalItems.map(it => <ItemCard item={it}/>)}
             </div>}
             {(queries.length !== 0 || commands.length !== 0) && <div className="col-6">
                 <div className="mb-3">
