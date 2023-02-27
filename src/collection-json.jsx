@@ -218,7 +218,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                     name={itData.name}
                     hidden={itData.display === "false"}
                     className="list-group-item d-flex justify-content-between">
-                    {itData.prompt}: <span>{itData.value}</span>
+                    <span className="me-2">{itData.prompt}:</span> <span>{itData.value}</span>
                 </li>)}
             </ul>
             <div className="card-body">
