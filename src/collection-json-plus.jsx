@@ -12,8 +12,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
     }, [triggerQuery]);
 
     React.useEffect(() => {
-        if (contextItems.length > 0)
-            document.getElementById("contextButton").click()
+        if (contextItems.length > 0) document.getElementById("contextButton").click()
     }, [contextItems])
 
     let httpGet = (e, href) => {
@@ -203,7 +202,22 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
         )
     };
 
-    const ItemCard = ({item}) => {
+    const ItemCard = ({item, id}) => {
+        const categoryItemData = item.data.filter(datum => !!datum.category);
+        const noCategoryItemData = item.data.filter(datum => !datum.category);
+        const [categoryData, setCategoryData] = React.useState(new Map());
+        React.useEffect(() => {
+            // Store category data in multimap with category name as key
+            let categoryData = new Map();
+            categoryItemData.forEach(datum => {
+                if (!categoryData.has(datum.category)) {
+                    categoryData.set(datum.category, []);
+                }
+                categoryData.get(datum.category).push(datum);
+            })
+            setCategoryData(categoryData);
+        }, [item])
+
         if (item.rel.includes("items-title")) {
             return <div className="row py-3">
                 <div className="col">
@@ -214,12 +228,36 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
         }
         return <div className="card p-3 mb-3">
             <ul className="list-group list-group-flush">
-                {item.data.map((itData, i) => <li
+                {noCategoryItemData.map((itData) => <li
                     name={itData.name}
                     hidden={itData.display === "false"}
                     className="list-group-item d-flex justify-content-between">
                     <span className="me-2">{itData.prompt}:</span> <span>{itData.value}</span>
                 </li>)}
+                {categoryItemData.length > 0 && <div>
+                    {Array.from(categoryData).map(([category, itemData]) => {
+                        const categoryName = `${category.replace(/\s/g, '')}${id}`;
+                        return <div>
+                            <button className="list-group-item d-flex w-100 border-0 justify-content-between"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target={`#collapse${categoryName}`}>
+                                <span>{category} - {itemData.length}</span> <span>👇</span>
+                            </button>
+                            <div id={`collapse${categoryName}`} className="collapse">
+                                <ul className="list-group list-group-flush">
+                                    {itemData.map((itData) => <li
+                                        name={itData.name}
+                                        hidden={itData.display === "false"}
+                                        className="list-group-item d-flex justify-content-between">
+                                        <span className="me-2">{itData.prompt}:</span>
+                                        <span>{itData.value}</span>
+                                    </li>)}
+                                </ul>
+                            </div>
+                        </div>;
+                    })}
+                </div>}
             </ul>
             <div className="card-body">
                 {item.links && (item.links.length < 3 ? item.links.map((itLink, i) => <a
@@ -273,7 +311,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                         <button type="button" className="btn-close" data-bs-dismiss="offcanvas"></button>
                     </div>
                     <div className="offcanvas-body">
-                        {contextItems.map(it => <ItemCard item={it}/>)}
+                        {contextItems.map((it, i) => <ItemCard item={it} id={`context${i}`}/>)}
                     </div>
                 </div>
             </div>}
@@ -320,7 +358,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
         </div>
         <div className="row ps-4 w-100 d-flex justify-content-center">
             {items.length !== 0 && <div className="col-6">
-                {normalItems.map(it => <ItemCard item={it}/>)}
+                {normalItems.map((it, i) => <ItemCard item={it} id={`normal${i}`}/>)}
             </div>}
             {(queries.length !== 0 || commands.length !== 0) && <div className="col-6">
                 <div className="mb-3">
