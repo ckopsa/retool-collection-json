@@ -2,10 +2,14 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
     let fullMode = false;
     let queries = model.cj.collection.queries;
     let commands = model.cj.collection.commands;
+
     let items = model.cj.collection.items;
     let contextItems = model.cj.collection.items.filter(it => it.rel.includes("context"));
-    let normalItems = model.cj.collection.items.filter(it => !it.rel.includes("context"));
+    let normalItems = model.cj.collection.items.filter(it => !it.rel.includes("context") && !it.table);
+    let [tableItems, setTableItems] = React.useState(new Map());
+
     let [loading, setLoading] = React.useState(false);
+
     let triggerQueryWithLoading = React.useCallback((...args) => {
         setLoading(true);
         triggerQuery(...args);
@@ -14,6 +18,18 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
     React.useEffect(() => {
         if (contextItems.length > 0) document.getElementById("contextButton").click()
     }, [contextItems])
+
+    React.useEffect(() => {
+        // multimap of table items
+        let newTableItems = new Map();
+        items.filter(it => it.table).forEach(it => {
+            if (!newTableItems.has(it.table)) {
+                newTableItems.set(it.table, []);
+            }
+            newTableItems.get(it.table).push(it);
+        })
+        setTableItems(newTableItems);
+    }, [items])
 
     let httpGet = (e, href) => {
         let currentHistory = JSON.parse(sessionStorage.getItem('historyStack')) || [];
@@ -226,45 +242,45 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                 </div>
             </div>
         }
-        return <div className="card p-3 mb-3">
-            <ul className="list-group list-group-flush">
-                {noCategoryItemData.map((itData) => <li
-                    name={itData.name}
-                    hidden={itData.display === "false"}
-                    className="list-group-item d-flex justify-content-between">
-                    <span className="me-2">{itData.prompt}:</span> <span>{itData.value}</span>
-                </li>)}
-                {categoryItemData.length > 0 && <div>
-                    {Array.from(categoryData).map(([category, itemData]) => {
-                        const categoryName = `${category.replace(/\s/g, '')}${id}`;
-                        return <div>
-                            <button className="list-group-item d-flex w-100 border-0 justify-content-between"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target={`#collapse${categoryName}`}>
-                                <span>{category} - {itemData.length}</span> <span>👇</span>
-                            </button>
-                            <div id={`collapse${categoryName}`} className="collapse">
-                                <ul className="list-group list-group-flush">
-                                    {itemData.map((itData) => <li
-                                        name={itData.name}
-                                        hidden={itData.display === "false"}
-                                        className="list-group-item d-flex justify-content-between">
-                                        <span className="me-2">{itData.prompt}:</span>
-                                        <span>{itData.value}</span>
-                                    </li>)}
-                                </ul>
-                            </div>
-                        </div>;
-                    })}
-                </div>}
-            </ul>
+        return <div className="card mb-3">
             <div className="card-body">
+                <ul className="card-text list-group list-group-flush">
+                    {noCategoryItemData.map((itData) => <li
+                        name={itData.name}
+                        hidden={itData.display === "false"}
+                        className="list-group-item d-flex justify-content-between">
+                        <span className="me-2">{itData.prompt}:</span> <span>{itData.value}</span>
+                    </li>)}
+                    {categoryItemData.length > 0 && <div>
+                        {Array.from(categoryData).map(([category, itemData]) => {
+                            const categoryName = `${category.replace(/\s/g, '')}${id}`;
+                            return <div>
+                                <button className="list-group-item d-flex w-100 border-0 justify-content-between"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target={`#collapse${categoryName}`}>
+                                    <span>{category} - {itemData.length}</span> <span>👇</span>
+                                </button>
+                                <div id={`collapse${categoryName}`} className="collapse">
+                                    <ul className="list-group list-group-flush">
+                                        {itemData.map((itData) => <li
+                                            name={itData.name}
+                                            hidden={itData.display === "false"}
+                                            className="list-group-item d-flex justify-content-between">
+                                            <span className="me-2">{itData.prompt}:</span>
+                                            <span>{itData.value}</span>
+                                        </li>)}
+                                    </ul>
+                                </div>
+                            </div>;
+                        })}
+                    </div>}
+                </ul>
                 {item.links && (item.links.length < 3 ? item.links.map((itLink, i) => <a
-                    href={itLink.href} className="card-link btn btn-primary"
+                    href={itLink.href} className="ms-2 btn btn-primary float-end"
                     onClick={(e) => httpGet(e, itLink.href)}>
                     {itLink.prompt}
-                </a>) : <div className="dropdown">
+                </a>) : <div className="dropdown float-end">
                     <button className="btn btn-secondary dropdown-toggle" type="button"
                             data-bs-toggle="dropdown"
                             aria-expanded="false">
@@ -278,6 +294,55 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                     </ul>
                 </div>)}
             </div>
+        </div>;
+    }
+
+    function ItemsTable({tableName, tableItems}) {
+        const codeTableName = tableName.replace(/ /g, '');
+        let [selectedRow, setSelectedRow] = React.useState(-1);
+
+        return <div id={`${codeTableName}-table`} className="card p-3 mb-3">
+            <h2>{tableName}</h2>
+            <table className="table table">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    {tableItems[0].data.map(d => <th scope="col">{d.prompt}</th>)}
+                </tr>
+                </thead>
+                <tbody>
+                {tableItems.map((item, i) => <tr
+                    data-bs-toggle="collapse"
+                    className={selectedRow === i ? "table-active" : ""}
+                    onClick={() => setSelectedRow(i === selectedRow ? -1 : i)}
+                    data-bs-target={`#${codeTableName}-${i}-collapse`}>
+                    <th scope="row">{i}</th>
+                    {item.data.map(d => <td>{d.value}</td>)}
+                </tr>)}
+                </tbody>
+            </table>
+            {tableItems.map((item, i) => <div id={`${codeTableName}-${i}-collapse`}
+                                              className="w-100 collapse"
+                                              data-bs-parent={`#${codeTableName}-table`}>
+                {item.links && (item.links.length < 4 ? item.links.map((itLink, i) => <a
+                    href={itLink.href} className="btn btn-primary btn float-end"
+                    onClick={(e) => httpGet(e, itLink.href)}>
+                    {itLink.prompt}
+                </a>) : <div className="dropdown float-end">
+                    <button className="btn btn-secondary dropdown-toggle btn"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        Actions
+                    </button>
+                    <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        {item.links.map((itLink, i) => <li>
+                            <a className="dropdown-item" href={itLink.href}
+                               onClick={(e) => httpGet(e, itLink.href)}>{itLink.prompt}</a>
+                        </li>)}
+                    </ul>
+                </div>)}
+            </div>)}
         </div>;
     }
 
@@ -358,6 +423,9 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
         </div>
         <div className="row ps-4 w-100 d-flex justify-content-center">
             {items.length !== 0 && <div className="col-6">
+                {Array.from(tableItems).map(([tableName, tableItems]) =>
+                    <ItemsTable tableName={tableName} tableItems={tableItems}/>
+                )}
                 {normalItems.map((it, i) => <ItemCard item={it} id={`normal${i}`}/>)}
             </div>}
             {(queries.length !== 0 || commands.length !== 0) && <div className="col-6">
