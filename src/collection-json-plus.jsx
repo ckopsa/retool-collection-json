@@ -2,13 +2,11 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
     let fullMode = true;
     let queries = model.cj.collection.queries;
     let commands = model.cj.collection.commands;
-
     let items = model.cj.collection.items;
     let contextItems = model.cj.collection.items.filter(it => it.rel.includes("context"));
     let normalItems = model.cj.collection.items.filter(it => !it.rel.includes("context") && !it.table);
-    let [tableItems, setTableItems] = React.useState(new Map());
-
     let [loading, setLoading] = React.useState(false);
+    let [tableItems, setTableItems] = React.useState(new Map());
 
     let triggerQueryWithLoading = React.useCallback((...args) => {
         setLoading(true);
@@ -303,29 +301,35 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
 
         return <div id={`${codeTableName}-table`} className="card p-3 mb-3">
             <h2>{tableName}</h2>
-            <table className="table table">
-                <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    {tableItems[0].data.map(d => <th scope="col">{d.prompt}</th>)}
-                </tr>
-                </thead>
-                <tbody>
-                {tableItems.map((item, i) => <tr
-                    data-bs-toggle="collapse"
-                    className={selectedRow === i ? "table-active" : ""}
-                    onClick={() => setSelectedRow(i === selectedRow ? -1 : i)}
-                    data-bs-target={`#${codeTableName}-${i}-collapse`}>
-                    <th scope="row">{i}</th>
-                    {item.data.map(d => <td>{d.value}</td>)}
-                </tr>)}
-                </tbody>
-            </table>
+            <div className="overflow-auto" style={{maxHeight: '500px'}}>
+                <table className="table table-sm">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        {tableItems[0].data.map(d => <th
+                            hidden={d.display === "false"}
+                            scope="col">{d.prompt}</th>)}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {tableItems.map((item, i) => <tr
+                        data-bs-toggle="collapse"
+                        className={selectedRow === i ? "table-active" : ""}
+                        onClick={() => setSelectedRow(i === selectedRow ? -1 : i)}
+                        data-bs-target={`#${codeTableName}-${i}-collapse`}>
+                        <th scope="row">{i}</th>
+                        {item.data.map(d => <td
+                            hidden={d.display === "false"}
+                        >{d.value}</td>)}
+                    </tr>)}
+                    </tbody>
+                </table>
+            </div>
             {tableItems.map((item, i) => <div id={`${codeTableName}-${i}-collapse`}
                                               className="w-100 collapse"
                                               data-bs-parent={`#${codeTableName}-table`}>
                 {item.links && (item.links.length < 4 ? item.links.map((itLink, i) => <a
-                    href={itLink.href} className="btn btn-primary btn float-end"
+                    href={itLink.href} className="btn btn-primary btn float-end ms-2"
                     onClick={(e) => httpGet(e, itLink.href)}>
                     {itLink.prompt}
                 </a>) : <div className="dropdown float-end">
@@ -348,7 +352,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
 
     return <div className="text-body bg-body">
         <div className="row">
-            <div className="col">
+            <div className="col" hidden={!fullMode}>
                 <button className="btn" onClick={goBack} hidden={historyStackIsEmpty()}>
                     ⬅️
                 </button>
