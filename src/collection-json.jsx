@@ -351,7 +351,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
     }
 
     return <div className="text-body bg-body">
-        <div className="row">
+        <div className="row w-100">
             <div className="col" hidden={!fullMode}>
                 <button className="btn" onClick={goBack} hidden={historyStackIsEmpty()}>
                     ⬅️
