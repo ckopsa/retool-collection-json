@@ -243,12 +243,15 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
         return <div className="card mb-3">
             <div className="card-body">
                 <ul className="card-text list-group list-group-flush">
-                    {noCategoryItemData.map((itData) => <li
-                        name={itData.name}
-                        hidden={itData.display === "false"}
-                        className="list-group-item d-flex justify-content-between">
-                        <span className="me-2">{itData.prompt}:</span> <span>{itData.value}</span>
-                    </li>)}
+                    {noCategoryItemData.map((itData) => {
+                        const displayTag = itData.display === "false" ? " d-none" : "";
+                        return <li
+                            name={itData.name}
+                            hidden={itData.display === "false"}
+                            className={"list-group-item d-flex justify-content-between" + displayTag}>
+                            <span className="me-2">{itData.prompt}:</span> <span>{itData.value}</span>
+                        </li>;
+                    })}
                     {categoryItemData.length > 0 && <div>
                         {Array.from(categoryData).map(([category, itemData]) => {
                             const categoryName = `${category.replace(/\s/g, '')}${id}`;
@@ -261,13 +264,16 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                                 </button>
                                 <div id={`collapse${categoryName}`} className="collapse">
                                     <ul className="list-group list-group-flush">
-                                        {itemData.map((itData) => <li
-                                            name={itData.name}
-                                            hidden={itData.display === "false"}
-                                            className="list-group-item d-flex justify-content-between">
-                                            <span className="me-2">{itData.prompt}:</span>
-                                            <span>{itData.value}</span>
-                                        </li>)}
+                                        {itemData.map((itData) => {
+                                            const displayTag = itData.display === "false" ? " d-none" : "";
+                                            return <li
+                                                name={itData.name}
+                                                hidden={itData.display === "false"}
+                                                className={"list-group-item d-flex justify-content-between" + displayTag}>
+                                                <span className="me-2">{itData.prompt}:</span>
+                                                <span>{itData.value}</span>
+                                            </li>;
+                                        })}
                                     </ul>
                                 </div>
                             </div>;
@@ -312,16 +318,19 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                     </tr>
                     </thead>
                     <tbody>
-                    {tableItems.map((item, i) => <tr
-                        data-bs-toggle="collapse"
-                        className={selectedRow === i ? "table-active" : ""}
-                        onClick={() => setSelectedRow(i === selectedRow ? -1 : i)}
-                        data-bs-target={`#${codeTableName}-${i}-collapse`}>
-                        <th scope="row">{i}</th>
-                        {item.data.map(d => <td
-                            hidden={d.display === "false"}
-                        >{d.value}</td>)}
-                    </tr>)}
+                    {tableItems.map((item, i) => {
+                        const displayTag = item.display === "false" ? " d-none" : "";
+                        return <tr
+                            data-bs-toggle="collapse"
+                            className={(selectedRow === i ? "table-active" : "") + displayTag}
+                            onClick={() => setSelectedRow(i === selectedRow ? -1 : i)}
+                            data-bs-target={`#${codeTableName}-${i}-collapse`}>
+                            <th scope="row">{i + 1}</th>
+                            {item.data.map(d => <td
+                                hidden={d.display === "false"}
+                            >{d.value}</td>)}
+                        </tr>;
+                    })}
                     </tbody>
                 </table>
             </div>
