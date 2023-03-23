@@ -5,3 +5,7 @@
     width: 100%;
     overflow: scroll;
 }
+
+[data-bs-theme="dark"] table {
+    --bs-table-active-bg: rgba(0, 0, 0, .80);
+}
