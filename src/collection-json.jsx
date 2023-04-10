@@ -166,7 +166,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                                     <label className="form-label me-2" htmlFor={datum.name}>{datum.prompt}: </label>
                                     <select id={datum.name} name={datum.name} defaultValue={datum.value}
                                             value={formData.get(datum.name)}
-                                            className={!!datum.readOnly ? "form-select" : "form-select text-dark"}
+                                            className="form-select"
                                             onChange={e => {
                                                 formData.set(e.target.name, e.target.value);
                                                 return setFormData(new Map(formData));
@@ -182,8 +182,9 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                                 return <div hidden={datum.display === false} className="mb-3">
                                     <label className="form-label me-2" htmlFor={datum.name}>{datum.prompt}: </label>
                                     <input type="checkbox" id={datum.name} name={datum.name} required={!!datum.required}
-                                           defaultChecked={datum.value === "true" || false}
-                                           className="form-check-input" disabled={!!datum.readOnly}/>
+                                           defaultChecked={datum.value.toLowerCase() === "true" || false}
+                                           className="form-check-input"
+                                           disabled={!!datum.readOnly}/>
                                 </div>
                             case 'date':
                                 return <div hidden={datum.display === false} className="mb-3">
@@ -191,8 +192,8 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                                     <input type="date" id={datum.name} name={datum.name}
                                            defaultValue={datum.value || ''}
                                            required={!!datum.required}
-                                           className={!!datum.readOnly ? "form-control" : "form-control text-dark"}
-                                           disabled={!!datum.readOnly}/>
+                                           className={"form-control" + (datum.readOnly ? "-plaintext" : "")}
+                                           readOnly={!!datum.readOnly}/>
                                 </div>
                             default:
                                 return <div hidden={datum.display === false} className="mb-3">
@@ -200,8 +201,8 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                                     <input type="text" id={datum.name} name={datum.name}
                                            defaultValue={datum.value || ''}
                                            required={!!datum.required}
-                                           className={!!datum.readOnly ? "form-control" : "form-control text-dark"}
-                                           disabled={!!datum.readOnly}/>
+                                           className={"form-control" + (datum.readOnly ? "-plaintext" : "")}
+                                           readOnly={!!datum.readOnly}/>
                                 </div>
                         }
 
