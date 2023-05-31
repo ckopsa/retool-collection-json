@@ -182,7 +182,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
                                 return <div hidden={datum.display === false} className="mb-3">
                                     <label className="form-label me-2" htmlFor={datum.name}>{datum.prompt}: </label>
                                     <input type="checkbox" id={datum.name} name={datum.name} required={!!datum.required}
-                                           defaultChecked={datum.value.toLowerCase() === "true" || false}
+                                           defaultChecked={!!datum.value && datum.value.toLowerCase() === "true"}
                                            className="form-check-input"
                                            disabled={!!datum.readOnly}/>
                                 </div>
