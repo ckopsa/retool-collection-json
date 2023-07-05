@@ -1,4 +1,7 @@
 const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
+    if (!model.cj) {
+        return <div>Loading...</div>
+    }
     let fullMode = false;
     let queries = model.cj.collection.queries;
     let commands = model.cj.collection.commands;
