@@ -5,13 +5,16 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
     let items = model.cj.collection.items;
     let contextItems = model.cj.collection.items.filter(it => it.rel.includes("context"));
     let normalItems = model.cj.collection.items.filter(it => !it.rel.includes("context") && !it.table);
-    let [loading, setLoading] = React.useState(false);
+    let [loading, setLoading] = React.useState(model.loading);
     let [tableItems, setTableItems] = React.useState(new Map());
 
     let triggerQueryWithLoading = React.useCallback((...args) => {
-        setLoading(true);
         triggerQuery(...args);
     }, [triggerQuery]);
+
+    React.useEffect(() => {
+        setLoading(model.loading);
+    }, [model.loading])
 
     React.useEffect(() => {
         if (contextItems.length > 0) document.getElementById("contextButton").click()
@@ -42,7 +45,7 @@ const MyCustomComponent = ({triggerQuery, model, modelUpdate}) => {
         sessionStorage.setItem('historyStack', JSON.stringify(currentHistory));
         sessionStorage.setItem('futureStack', JSON.stringify([]));
         modelUpdate({
-            cj: model.cj, form: model.form, link: href
+            cj: model.cj, form: model.form, link: href, loading: true,
         });
         triggerQueryWithLoading("httpGet")
         e.preventDefault();
